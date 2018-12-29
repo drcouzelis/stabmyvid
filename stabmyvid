@@ -1,0 +1,13 @@
+#!/usr/bin/bash
+
+# Zoom
+ffmpeg -y -i "$1" -vf scale="trunc((iw*1.15)/2)*2:trunc(ow/a/2)*2" -pix_fmt yuv420p zoomed.mp4
+
+# Calculate stabilization
+ffmpeg -y -i zoomed.mp4 -vf vidstabdetect -f null -
+
+# Stabilize!
+ffmpeg -y -i zoomed.mp4 -vf vidstabtransform=smoothing=20:crop=black:zoom=-15:optzoom=0:interpol=linear,unsharp=5:5:0.8:3:3:0.4 "${1%.*}"-stab.mp4
+
+# Remove temporary files
+rm -f transforms.trf zoomed.mp4
